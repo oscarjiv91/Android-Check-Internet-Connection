@@ -81,25 +81,17 @@ public class ConnectionService extends Service {
     }
 
     private boolean isNetworkAvailable(){
-        HttpGet httpGet = new HttpGet(url_ping);
-        HttpParams httpParameters = new BasicHttpParams();
-
-        int timeoutConnection = 5000;
-        HttpConnectionParams.setConnectionTimeout(httpParameters, timeoutConnection);
-
-        int timeoutSocket = 7000;
-        HttpConnectionParams.setSoTimeout(httpParameters, timeoutSocket);
-
-        DefaultHttpClient httpClient = new DefaultHttpClient(httpParameters);
-        try{
-            httpClient.execute(httpGet);
-            mConnectionServiceCallback.hasInternetConnection();
-            return true;
-        }
-        catch(ClientProtocolException e){
-            e.printStackTrace();
-        }
-        catch(IOException e){
+         try {
+            HttpURLConnection urlc = (HttpURLConnection) (new URL(url_ping).openConnection());
+            urlc.setRequestProperty("User-Agent", "Test");
+            urlc.setRequestProperty("Connection", "close");
+            urlc.setConnectTimeout(1500);
+            urlc.connect();
+            if ((urlc.getResponseCode() == 200)) {
+                mConnectionServiceCallback.hasInternetConnection();
+                return true;
+            }
+        } catch (Exception e) {
             e.printStackTrace();
         }
         mConnectionServiceCallback.hasNoInternetConnection();
